@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Segreti e configurazione locale
+.env
+.env.*
+!.env.example
+
+# Dati scaricati e generati
+data/
+*.log
+
+# Editor e sistema
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
