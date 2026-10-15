@@ -93,7 +93,7 @@ class Planner:
         self,
         client: ClientConfig,
         store: KnowledgeStore,
-        llm: LLMClient,
+        llm: LLMClient | None,
         embedder: Embedder | None = None,
         active: bool = True,
         min_profile_confidence: float = MIN_PROFILE_CONFIDENCE,
@@ -140,6 +140,8 @@ class Planner:
         candidates = self.candidates(request, language)
         if not any(c["tipo"] in CANDIDATE_TYPES or c["fonte"] == "pagina" for c in candidates):
             return PlanResponse(standard=True, motivi=["nessun contenuto approvato per questo profilo"])
+        if self.llm is None:
+            return PlanResponse(standard=True, motivi=["modello linguistico non configurato"])
 
         try:
             raw = self.llm.complete_json(SYSTEM_PROMPT, self.prompt(request, language, candidates))

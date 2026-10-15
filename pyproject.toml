@@ -8,6 +8,8 @@ dependencies = [
     "beautifulsoup4>=4.12",
     "pypdf>=5.0",
     "python-dotenv>=1.0",
+    "fastapi>=0.110",
+    "uvicorn>=0.30",
 ]
 
 [project.optional-dependencies]
@@ -22,6 +24,8 @@ quuipu-ingest = "quuipu.pipeline:main"
 quuipu-review = "quuipu.knowledge.cli:review_main"
 quuipu-search = "quuipu.knowledge.cli:search_main"
 quuipu-plan = "quuipu.composer.planner:main"
+quuipu-agent = "quuipu.control:main"
+quuipu-api = "quuipu.api.app:main"
 
 [build-system]
 requires = ["setuptools>=68"]

@@ -4,6 +4,8 @@ name = "Casa Paladin"
 sector = "agrifood"
 base_url = "https://www.casapaladin.it/"
 languages = ["it", "en"]
+# Siti da cui il widget può chiamare l'API: il sito del cliente e il pilota.
+allowed_origins = ["https://www.casapaladin.it", "https://casapaladin.quuipu.me"]
 
 # Profili di visitatore: per ora valgono quelli generici della specifica
 # (buyer_estero, distributore, privato, ente, curioso). I profili specifici

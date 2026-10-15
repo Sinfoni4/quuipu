@@ -11,8 +11,8 @@ PoC in costruzione:
 - **Sito pilota:** cantina vitivinicola, ospitato su quuipu.me.
 - **Stack:** backend Python (FastAPI) e front-end statico.
 - **Modelli:** Mistral per il testo e mistral-embed per la ricerca semantica; il modello per le immagini non è ancora stato scelto.
-- **Fatto:** ingestione completa, base di conoscenza con ricerca semantica, page plan con validatore, cache e registro.
-- **Da fare:** stima del profilo del visitatore, API, sito pilota, assistente in chat.
+- **Fatto:** ingestione completa, base di conoscenza con ricerca semantica, page plan con validatore, cache e registro, stima del profilo del visitatore, API.
+- **Da fare:** sito pilota con i componenti, assistente in chat con raccolta contatti, metriche, deploy in UE.
 
 ## Struttura
 
@@ -37,6 +37,12 @@ PoC in costruzione:
   - `planner.py`: l'agente che propone il page plan.
   - `validator.py`: controlla il piano; se non torna, pagina standard.
   - `history.py`: cache dei piani e registro di tutte le risposte.
+- `src/quuipu/visitor/profile.py`: stima del profilo dai segnali della sessione.
+- `src/quuipu/api/`: API FastAPI.
+  - `app.py`: gli endpoint.
+  - `sessions.py`: sessioni solo in memoria, senza cookie.
+  - `render.py`: dati pubblici dei contenuti per il widget.
+- `src/quuipu/control.py`: interruttore di emergenza dell'agente.
 - `tests/`: test automatici, con sito, modelli ed embedding simulati.
 - `data/`: dati scaricati e generati, una cartella per cliente. Non va su git.
 
@@ -100,6 +106,32 @@ Compone la pagina per un profilo e stampa il piano validato, oppure il motivo pe
 
 ```bash
 .venv\Scripts\quuipu-plan.exe casapaladin --profilo privato --domanda "avete vini biologici?"
+```
+
+### API
+
+L'API ascolta su http://127.0.0.1:8000. La documentazione interattiva è su `/docs`.
+
+```bash
+.venv\Scripts\quuipu-api.exe
+```
+
+Endpoint principali:
+
+- `POST /v1/<cliente>/plan`: riceve pagina, referrer, lingua ed eventuale domanda. Restituisce il page plan con i dati dei contenuti, oppure `standard: true`.
+- `GET /v1/<cliente>/contents/<id>`: dati pubblici di un contenuto approvato.
+- `GET /v1/<cliente>/status`: dice se l'agente è acceso.
+
+### Interruttore di emergenza
+
+Ha effetto subito, senza riavviare l'API:
+
+```bash
+.venv\Scripts\quuipu-agent.exe casapaladin spegni --motivo "verifica contenuti"
+```
+
+```bash
+.venv\Scripts\quuipu-agent.exe casapaladin accendi
 ```
 
 ### Singoli passaggi

@@ -188,6 +188,14 @@ class KnowledgeStore:
         row = self.conn.execute("SELECT * FROM contents WHERE id = ?", (content_id,)).fetchone()
         return self._row(row) if row else None
 
+    def find_page(self, url: str) -> dict | None:
+        """Pagina del sito con quell'URL (con o senza barra finale)."""
+        base = url.split("#")[0].split("?")[0].rstrip("/")
+        row = self.conn.execute(
+            "SELECT * FROM contents WHERE fonte = 'pagina' AND url IN (?, ?)", (base, base + "/")
+        ).fetchone()
+        return self._row(row) if row else None
+
     def list(
         self, stato: str | None = None, tipo: str | None = None, profilo: str | None = None
     ) -> list[dict]:

@@ -6,6 +6,7 @@ import os
 import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
+from urllib.parse import urlsplit
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 CLIENTS_DIR = ROOT_DIR / "clients"
@@ -40,21 +41,57 @@ class VisitorProfile:
     name: str
     looks_for: str
     highlight: str
+    # Segnali per riconoscere il profilo (specifica §6). Le parole chiave valgono
+    # come inizio di parola: "import" riconosce anche "importatore" e "importer".
+    keywords: tuple[str, ...] = ()
+    referrers: tuple[str, ...] = ()  # pezzi di dominio di provenienza, es. "linkedin."
+    foreign: bool = False  # un browser in lingua estera è un indizio per questo profilo
 
 
 # Profili generici della specifica (§2). Ogni cliente può sostituirli con
 # profili specifici del proprio settore nella sezione [[profiles]] del TOML.
 DEFAULT_PROFILES = (
-    VisitorProfile("buyer_estero", "Buyer estero (B2B)", "Affidabilità, volumi, export",
-                   "Certificazioni, capacità produttiva, contatti commerciali, lingua"),
-    VisitorProfile("distributore", "Distributore o rivenditore", "Margini, condizioni, cataloghi",
-                   "Listino su richiesta, cataloghi PDF, condizioni di fornitura"),
-    VisitorProfile("privato", "Cliente privato", "Prodotto e fiducia",
-                   "Storia dell'azienda, schede prodotto, dove acquistare"),
-    VisitorProfile("ente", "Ente o stazione appaltante", "Conformità e requisiti",
-                   "Certificazioni, documentazione, referenze"),
-    VisitorProfile("curioso", "Candidato o curioso", "Chi siete",
-                   "Chi siamo, lavora con noi, notizie"),
+    VisitorProfile(
+        "buyer_estero", "Buyer estero (B2B)", "Affidabilità, volumi, export",
+        "Certificazioni, capacità produttiva, contatti commerciali, lingua",
+        keywords=("import", "export", "esport", "wholesale", "ingrosso", "buyer", "b2b",
+                  "volum", "container", "pallet", "bancal", "international", "internazional",
+                  "einkauf", "importateur", "importador"),
+        referrers=("linkedin.", "alibaba.", "europages.", "kompass."),
+        foreign=True,
+    ),
+    VisitorProfile(
+        "distributore", "Distributore o rivenditore", "Margini, condizioni, cataloghi",
+        "Listino su richiesta, cataloghi PDF, condizioni di fornitura",
+        keywords=("distribut", "rivendit", "reseller", "retailer", "enotec", "wine shop",
+                  "horeca", "ristorant", "restaurant", "listino", "price list", "catalog",
+                  "condizioni di fornitura", "agente", "agent", "händler", "grossist"),
+        referrers=("linkedin.",),
+    ),
+    VisitorProfile(
+        "privato", "Cliente privato", "Prodotto e fiducia",
+        "Storia dell'azienda, schede prodotto, dove acquistare",
+        keywords=("acquist", "comprare", "compro", "buy", "shop", "negozio", "regal", "gift",
+                  "degustazion", "tasting", "visit", "abbinament", "pairing", "bottigli",
+                  "bottle", "cena", "dinner", "prezzo", "price"),
+        referrers=("instagram.", "facebook.", "tripadvisor.", "vivino."),
+    ),
+    VisitorProfile(
+        "ente", "Ente o stazione appaltante", "Conformità e requisiti",
+        "Certificazioni, documentazione, referenze",
+        keywords=("bando", "bandi", "gara d", "gare d", "appalt", "tender", "conformit", "compliance",
+                  "pubblica amministrazione", "comune di", "regione", "ministero",
+                  "public authority", "procurement"),
+        referrers=(".gov.", ".gov", "acquistinretepa.", "anticorruzione."),
+    ),
+    VisitorProfile(
+        "curioso", "Candidato o curioso", "Chi siete",
+        "Chi siamo, lavora con noi, notizie",
+        keywords=("lavora con noi", "lavoro", "career", "job", "stage", "tirocin",
+                  "internship", "curriculum", "storia", "history", "chi siamo", "about us",
+                  "news", "notizi"),
+        referrers=("indeed.", "infojobs.", "glassdoor."),
+    ),
 )
 
 
@@ -68,6 +105,8 @@ class ClientConfig:
     crawl: CrawlSettings = field(default_factory=CrawlSettings)
     ingestion: IngestionSettings = field(default_factory=IngestionSettings)
     profiles: tuple[VisitorProfile, ...] = DEFAULT_PROFILES
+    # Siti da cui il widget può chiamare l'API (CORS).
+    allowed_origins: tuple[str, ...] = ()
 
 
 def load_client(client_id: str, clients_dir: Path | None = None) -> ClientConfig:
@@ -97,7 +136,18 @@ def load_client(client_id: str, clients_dir: Path | None = None) -> ClientConfig
             ),
         ),
         profiles=tuple(
-            VisitorProfile(p["id"], p["name"], p["looks_for"], p["highlight"])
+            VisitorProfile(
+                p["id"], p["name"], p["looks_for"], p["highlight"],
+                keywords=tuple(p.get("keywords", ())),
+                referrers=tuple(p.get("referrers", ())),
+                foreign=p.get("foreign", False),
+            )
             for p in raw["profiles"]
         ) if raw.get("profiles") else DEFAULT_PROFILES,
+        allowed_origins=tuple(raw.get("allowed_origins", ())) or (_origin(raw["base_url"]),),
     )
+
+
+def _origin(url: str) -> str:
+    parts = urlsplit(url)
+    return f"{parts.scheme}://{parts.netloc}"
