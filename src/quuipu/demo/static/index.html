@@ -172,19 +172,9 @@ const PROFILES = {buyer_estero:"Buyer estero", distributore:"Distributore / rive
 const CTA = {
   it:{preventivo:"Richiedi un preventivo", campione:"Richiedi un campione", degustazione:"Prenota una degustazione", contatto:"Contattaci"},
   en:{preventivo:"Request a quote", campione:"Request a sample", degustazione:"Book a tasting", contatto:"Contact us"}};
-const SCENARIOS = [
-  {t:"Visitatore qualunque", d:"Arriva sulla home, senza altri segnali.", pagina:"/", lingua:"it-IT"},
-  {t:"Appassionata da Instagram", d:"Clicca un post e atterra sulle degustazioni.", pagina:"/degustazioni/",
-   referrer:"https://www.instagram.com/", lingua:"it-IT"},
-  {t:"Buyer da ricerca Bing", d:"Cerca «italian organic wine importers wholesale», browser in inglese.",
-   pagina:"/en/export/", referrer:"https://www.bing.com/search?q=italian+organic+wine+importers+wholesale", lingua:"en-GB"},
-  {t:"Importatore tedesco in chat", d:"Browser in tedesco, scrive: «We are a wine importer from Germany…»",
-   pagina:"/en/", lingua:"de-DE", domanda:"We are a wine importer from Germany. Do you have organic certifications?"},
-  {t:"Ristoratore che chiede il listino", d:"Scrive: «Ho un ristorante a Milano: avete un listino?»",
-   pagina:"/vini/", lingua:"it-IT", domanda:"Ho un ristorante a Milano: avete un listino per la ristorazione?"},
-  {t:"Ente da gara d'appalto", d:"Cerca una fornitura per una mensa: segnali ancora deboli.",
-   pagina:"/certificazioni/", referrer:"https://www.bing.com/search?q=fornitura+vino+biologico+gara+d%27appalto+mensa", lingua:"it-IT"},
-];
+// Versione registrata (Netlify): niente server, risposte salvate in data/.
+const STATIC = !!window.QUUIPU_STATIC;
+let SCENARIOS = [], RECORDED = null, agentOn = true;
 let SITE = "", sessionId = null;
 
 function h(tag, attrs, ...children){
@@ -202,7 +192,15 @@ const clean = t => (t||"").split(" – ")[0];
 const pct = x => Math.round(x*100) + "%";
 
 async function loadInfo(){
-  const info = await (await fetch("/demo-api/info")).json();
+  const info = await (await fetch(STATIC ? "data/info.json" : "/demo-api/info")).json();
+  if (STATIC){
+    RECORDED = await (await fetch("data/registrazioni.json")).json();
+    document.querySelector("details.custom").hidden = true;
+    document.querySelector(".top .note").textContent =
+      "Versione registrata: risposte reali della piattaforma, salvate dalla demo. Cantina inventata, modello simulato.";
+  }
+  SCENARIOS = info.scenari;
+  renderScenarios();
   const s = info.sintesi;
   SITE = s.sito;
   document.getElementById("site-link").href = SITE + "/";
@@ -221,10 +219,12 @@ async function loadInfo(){
 }
 
 function setAgent(on){
+  agentOn = on;
   document.getElementById("agent").checked = on;
   document.getElementById("agent-label").textContent = on ? "Agente acceso" : "Agente spento (emergenza)";
 }
 document.getElementById("agent").addEventListener("change", async e => {
+  if (STATIC){ setAgent(e.target.checked); return; }
   const r = await fetch("/demo-api/agent", {method:"POST", headers:{"Content-Type":"application/json"},
     body: JSON.stringify({attivo: e.target.checked})});
   setAgent((await r.json()).attivo);
@@ -232,7 +232,7 @@ document.getElementById("agent").addEventListener("change", async e => {
 
 function renderScenarios(){
   document.getElementById("scenarios").replaceChildren(...SCENARIOS.map((s,i) =>
-    h("button",{class:"card", "data-i":i, onclick: () => { mark(i); visit(s, false); }}, h("b",{},s.t), h("span",{},s.d))));
+    h("button",{class:"card", "data-i":i, onclick: () => { mark(i); visit(s, false, i); }}, h("b",{},s.t), h("span",{},s.d))));
 }
 function mark(i){ document.querySelectorAll(".card").forEach(c => c.classList.toggle("active", c.dataset.i == i)); }
 
@@ -243,15 +243,20 @@ document.getElementById("custom").addEventListener("submit", e => {
          domanda:f.get("domanda")}, !!f.get("stessa"));
 });
 
-async function visit(s, sameSession){
+async function visit(s, sameSession, index){
   const body = {pagina: SITE + s.pagina, referrer: s.referrer || "", lingua: s.lingua || "", dispositivo: "desktop",
                 session_id: sameSession ? sessionId : null};
   if (s.domanda) body.domanda = s.domanda;
   document.getElementById("result-lead").textContent = "Visita: " + s.t;
-  const t0 = performance.now();
-  const r = await fetch(`/v1/${CLIENT}/plan`, {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)});
-  const data = await r.json();
-  const ms = Math.round(performance.now() - t0);
+  let data, ms = null;
+  if (STATIC){
+    data = RECORDED[agentOn ? "acceso" : "spento"][index];
+  } else {
+    const t0 = performance.now();
+    const r = await fetch(`/v1/${CLIENT}/plan`, {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)});
+    data = await r.json();
+    ms = Math.round(performance.now() - t0);
+  }
   sessionId = data.session_id;
   renderView(data, body);
   renderAnalysis(data, body, s, ms);
@@ -314,7 +319,7 @@ function renderAnalysis(data, body, s, ms){
   out.push(h("div",{},
     h("span",{class:"badge " + (data.standard ? "std" : "ok")}, data.standard ? "Pagina standard" : "Pagina adattiva"),
     data.da_cache ? h("span",{class:"badge cache"}, "dalla cache") : null,
-    h("span",{style:"font-size:12px;color:var(--muted);margin-left:8px"}, ms + " ms")));
+    h("span",{style:"font-size:12px;color:var(--muted);margin-left:8px"}, ms == null ? "risposta registrata" : ms + " ms")));
   (data.motivi||[]).forEach(m => out.push(h("div",{class:"msg bad"}, "Perché: " + m)));
 
   out.push(h("div",{class:"box"}, h("h4",{}, "Segnali inviati dal sito"),
@@ -348,7 +353,6 @@ function renderAnalysis(data, body, s, ms){
   document.getElementById("analysis").replaceChildren(...out);
 }
 
-renderScenarios();
 loadInfo();
 </script>
 </body>

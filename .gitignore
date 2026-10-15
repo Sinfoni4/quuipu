@@ -13,6 +13,7 @@ venv/
 
 # Dati scaricati e generati
 data/
+dist/
 *.log
 
 # Editor e sistema

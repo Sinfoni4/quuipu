@@ -222,7 +222,18 @@ footer a{color:#7a6e64}
 """
 
 
-def render_page(path: str) -> str:
+def with_prefix(html: str, prefix: str) -> str:
+    """Sposta i link interni sotto un percorso, es. "/sito" per la demo su Netlify."""
+    if not prefix:
+        return html
+    return html.replace('href="/', f'href="{prefix}/').replace('src="/', f'src="{prefix}/')
+
+
+def render_page(path: str, prefix: str = "") -> str:
+    return with_prefix(_render_page(path), prefix)
+
+
+def _render_page(path: str) -> str:
     lang, title, description, body, image, alternate = PAGES[path]
     nav = " ".join(f'<a href="{href}">{escape(label)}</a>' for href, label in NAV[lang])
     links = ""
@@ -244,12 +255,12 @@ def render_page(path: str) -> str:
 </body></html>"""
 
 
-def build_site(root: Path, base_url: str) -> None:
+def build_site(root: Path, base_url: str, prefix: str = "") -> None:
     """Scrive il sito statico in root: pagine, sitemap, robots, PDF e immagini."""
     for path in PAGES:
         target = root / path.strip("/") / "index.html" if path != "/" else root / "index.html"
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(render_page(path), encoding="utf-8")
+        target.write_text(render_page(path, prefix), encoding="utf-8")
 
     login = root / "area-riservata" / "login" / "index.html"
     login.parent.mkdir(parents=True, exist_ok=True)

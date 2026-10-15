@@ -27,6 +27,7 @@ quuipu-plan = "quuipu.composer.planner:main"
 quuipu-agent = "quuipu.control:main"
 quuipu-api = "quuipu.api.app:main"
 quuipu-demo = "quuipu.demo.run:main"
+quuipu-demo-export = "quuipu.demo.export:main"
 
 [build-system]
 requires = ["setuptools>=68"]

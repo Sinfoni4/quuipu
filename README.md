@@ -63,6 +63,16 @@ Mostra tutta la piattaforma al lavoro senza Mistral e senza dati reali. Il coman
 .venv\Scripts\quuipu-demo.exe
 ```
 
+### Demo online (Netlify)
+
+Il comando che segue genera la versione registrata della demo in `dist/quuipu-demo/`, insieme allo zip `dist/quuipu-demo.zip`. Contiene le risposte reali della piattaforma per i visitatori-tipo, con agente acceso e spento, e il sito della cantina inventata sotto `/sito`. È un sito statico, senza server, ed è marcato come non indicizzabile.
+
+```bash
+.venv\Scripts\quuipu-demo-export.exe
+```
+
+Per pubblicarlo basta trascinare lo zip, o la cartella, su https://app.netlify.com/drop. Nella versione online il riquadro "Prova tu un visitatore" non c'è, perché richiede il server.
+
 ## Uso
 
 Installazione:

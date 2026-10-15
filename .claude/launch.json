@@ -6,6 +6,12 @@
       "runtimeExecutable": ".venv\\Scripts\\quuipu-demo.exe",
       "runtimeArgs": [],
       "port": 8000
+    },
+    {
+      "name": "quuipu-demo-statica",
+      "runtimeExecutable": ".venv\\Scripts\\python.exe",
+      "runtimeArgs": ["-m", "http.server", "8080", "--bind", "127.0.0.1", "--directory", "dist/quuipu-demo"],
+      "port": 8080
     }
   ]
 }

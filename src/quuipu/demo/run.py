@@ -41,6 +41,28 @@ STATIC_DIR = Path(__file__).parent / "static"
 # Motivi che il cliente simulato accetta confermando la scheda.
 ROUTINE_REASONS = ("prezzo da confermare", "specifiche tecniche da confermare", "certificazioni da confermare")
 
+SCENARIOS = [
+    {"t": "Visitatore qualunque", "d": "Arriva sulla home, senza altri segnali.",
+     "pagina": "/", "lingua": "it-IT"},
+    {"t": "Appassionata da Instagram", "d": "Clicca un post e atterra sulle degustazioni.",
+     "pagina": "/degustazioni/", "referrer": "https://www.instagram.com/", "lingua": "it-IT"},
+    {"t": "Buyer da ricerca Bing",
+     "d": "Cerca «italian organic wine importers wholesale», browser in inglese.",
+     "pagina": "/en/export/", "lingua": "en-GB",
+     "referrer": "https://www.bing.com/search?q=italian+organic+wine+importers+wholesale"},
+    {"t": "Importatore tedesco in chat",
+     "d": "Browser in tedesco, scrive: «We are a wine importer from Germany…»",
+     "pagina": "/en/", "lingua": "de-DE",
+     "domanda": "We are a wine importer from Germany. Do you have organic certifications?"},
+    {"t": "Ristoratore che chiede il listino",
+     "d": "Scrive: «Ho un ristorante a Milano: avete un listino?»",
+     "pagina": "/vini/", "lingua": "it-IT",
+     "domanda": "Ho un ristorante a Milano: avete un listino per la ristorazione?"},
+    {"t": "Ente da gara d'appalto", "d": "Cerca una fornitura per una mensa: segnali ancora deboli.",
+     "pagina": "/certificazioni/", "lingua": "it-IT",
+     "referrer": "https://www.bing.com/search?q=fornitura+vino+biologico+gara+d%27appalto+mensa"},
+]
+
 CLIENT_TOML = """id = "valmora"
 name = "Cantina Valmora"
 sector = "agrifood"
@@ -137,7 +159,7 @@ def create_demo_app(base: Path, summary: dict) -> FastAPI:
         return {
             "sintesi": summary, "stati": counts, "in_revisione": review, "contenuti": contents,
             "pagine": [{"percorso": p, "lingua": v[0], "titolo": v[1].split(" – ")[0]} for p, v in PAGES.items()],
-            "registro": log, "agente": agent_status(CLIENT_ID, data_root),
+            "registro": log, "agente": agent_status(CLIENT_ID, data_root), "scenari": SCENARIOS,
         }
 
     @app.post("/demo-api/agent")
