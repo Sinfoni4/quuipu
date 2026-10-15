@@ -5,6 +5,16 @@ sector = "agrifood"
 base_url = "https://www.casapaladin.it/"
 languages = ["it", "en"]
 
+# Profili di visitatore: per ora valgono quelli generici della specifica
+# (buyer_estero, distributore, privato, ente, curioso). I profili specifici
+# per la cantina sono un punto aperto; si aggiungono così:
+#
+# [[profiles]]
+# id = "..."
+# name = "..."
+# looks_for = "..."
+# highlight = "..."
+
 [ingestion]
 confidence_threshold = 0.7
 image_categories = [

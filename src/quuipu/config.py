@@ -35,6 +35,30 @@ class IngestionSettings:
 
 
 @dataclass(frozen=True)
+class VisitorProfile:
+    id: str
+    name: str
+    looks_for: str
+    highlight: str
+
+
+# Profili generici della specifica (§2). Ogni cliente può sostituirli con
+# profili specifici del proprio settore nella sezione [[profiles]] del TOML.
+DEFAULT_PROFILES = (
+    VisitorProfile("buyer_estero", "Buyer estero (B2B)", "Affidabilità, volumi, export",
+                   "Certificazioni, capacità produttiva, contatti commerciali, lingua"),
+    VisitorProfile("distributore", "Distributore o rivenditore", "Margini, condizioni, cataloghi",
+                   "Listino su richiesta, cataloghi PDF, condizioni di fornitura"),
+    VisitorProfile("privato", "Cliente privato", "Prodotto e fiducia",
+                   "Storia dell'azienda, schede prodotto, dove acquistare"),
+    VisitorProfile("ente", "Ente o stazione appaltante", "Conformità e requisiti",
+                   "Certificazioni, documentazione, referenze"),
+    VisitorProfile("curioso", "Candidato o curioso", "Chi siete",
+                   "Chi siamo, lavora con noi, notizie"),
+)
+
+
+@dataclass(frozen=True)
 class ClientConfig:
     id: str
     name: str
@@ -43,6 +67,7 @@ class ClientConfig:
     languages: tuple[str, ...]
     crawl: CrawlSettings = field(default_factory=CrawlSettings)
     ingestion: IngestionSettings = field(default_factory=IngestionSettings)
+    profiles: tuple[VisitorProfile, ...] = DEFAULT_PROFILES
 
 
 def load_client(client_id: str, clients_dir: Path | None = None) -> ClientConfig:
@@ -71,4 +96,8 @@ def load_client(client_id: str, clients_dir: Path | None = None) -> ClientConfig
                 ingestion.get("image_categories", DEFAULT_IMAGE_CATEGORIES)
             ),
         ),
+        profiles=tuple(
+            VisitorProfile(p["id"], p["name"], p["looks_for"], p["highlight"])
+            for p in raw["profiles"]
+        ) if raw.get("profiles") else DEFAULT_PROFILES,
     )

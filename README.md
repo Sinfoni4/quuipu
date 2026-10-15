@@ -19,6 +19,7 @@ PoC in avvio:
   - `crawler.py`: scarica il sito.
   - `documents.py`: estrae schede prodotto dai PDF.
   - `images.py`: descrive le foto.
+  - `classification.py`: assegna tipo e profili di visitatore a ogni contenuto.
   - `review.py`: decide cosa va in coda di revisione.
   - `llm.py`: accesso ai modelli.
 - `tests/`: test automatici.
@@ -53,4 +54,10 @@ Per l'estrazione dai PDF e le immagini serve un modello. Copia `.env.example` in
 
 ```bash
 .venv\Scripts\quuipu-describe-images.exe casapaladin percorso\cartella-foto
+```
+
+La classificazione per tipo e profilo di visitatore usa i risultati dei tre passaggi precedenti:
+
+```bash
+.venv\Scripts\quuipu-classify.exe casapaladin
 ```

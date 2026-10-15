@@ -17,6 +17,7 @@ dev = ["pytest>=8"]
 quuipu-crawl = "quuipu.ingestion.crawler:main"
 quuipu-parse-docs = "quuipu.ingestion.documents:main"
 quuipu-describe-images = "quuipu.ingestion.images:main"
+quuipu-classify = "quuipu.ingestion.classification:main"
 
 [build-system]
 requires = ["setuptools>=68"]
