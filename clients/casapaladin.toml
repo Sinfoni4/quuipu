@@ -5,6 +5,20 @@ sector = "agrifood"
 base_url = "https://www.casapaladin.it/"
 languages = ["it", "en"]
 
+[ingestion]
+confidence_threshold = 0.7
+image_categories = [
+    "bottiglia",
+    "vigneto",
+    "cantina",
+    "degustazione",
+    "persone",
+    "evento",
+    "paesaggio",
+    "logo",
+    "altro",
+]
+
 [crawl]
 max_pages = 300
 delay_seconds = 1.0

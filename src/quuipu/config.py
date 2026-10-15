@@ -24,6 +24,16 @@ class CrawlSettings:
     exclude: tuple[str, ...] = ()
 
 
+DEFAULT_IMAGE_CATEGORIES = ("prodotto", "struttura", "persone", "evento", "paesaggio", "logo", "altro")
+
+
+@dataclass(frozen=True)
+class IngestionSettings:
+    # Sotto questa confidenza un elemento estratto va in coda di revisione.
+    confidence_threshold: float = 0.7
+    image_categories: tuple[str, ...] = DEFAULT_IMAGE_CATEGORIES
+
+
 @dataclass(frozen=True)
 class ClientConfig:
     id: str
@@ -32,6 +42,7 @@ class ClientConfig:
     base_url: str
     languages: tuple[str, ...]
     crawl: CrawlSettings = field(default_factory=CrawlSettings)
+    ingestion: IngestionSettings = field(default_factory=IngestionSettings)
 
 
 def load_client(client_id: str, clients_dir: Path | None = None) -> ClientConfig:
@@ -39,6 +50,7 @@ def load_client(client_id: str, clients_dir: Path | None = None) -> ClientConfig
     with path.open("rb") as f:
         raw = tomllib.load(f)
     crawl = raw.get("crawl", {})
+    ingestion = raw.get("ingestion", {})
     return ClientConfig(
         id=raw["id"],
         name=raw["name"],
@@ -50,5 +62,13 @@ def load_client(client_id: str, clients_dir: Path | None = None) -> ClientConfig
             delay_seconds=crawl.get("delay_seconds", CrawlSettings.delay_seconds),
             timeout_seconds=crawl.get("timeout_seconds", CrawlSettings.timeout_seconds),
             exclude=tuple(crawl.get("exclude", ())),
+        ),
+        ingestion=IngestionSettings(
+            confidence_threshold=ingestion.get(
+                "confidence_threshold", IngestionSettings.confidence_threshold
+            ),
+            image_categories=tuple(
+                ingestion.get("image_categories", DEFAULT_IMAGE_CATEGORIES)
+            ),
         ),
     )
