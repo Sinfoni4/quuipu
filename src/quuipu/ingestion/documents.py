@@ -12,6 +12,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+from typing import Sequence
 
 from pypdf import PdfReader
 from pypdf.errors import PdfReadError
@@ -180,12 +181,17 @@ def parse_pdf(client: ClientConfig, path: Path, llm: LLMClient) -> tuple[list[di
 
 
 def parse_documents(
-    client: ClientConfig, folder: Path, llm: LLMClient, out_dir: Path | None = None
+    client: ClientConfig,
+    folders: Path | Sequence[Path],
+    llm: LLMClient,
+    out_dir: Path | None = None,
 ) -> dict:
-    """Analizza tutti i PDF della cartella e salva le schede in products.json."""
+    """Analizza tutti i PDF delle cartelle e salva le schede in products.json."""
+    folders = [folders] if isinstance(folders, Path) else list(folders)
+    paths = sorted(p for folder in folders if folder.exists() for p in folder.rglob("*.pdf"))
     products: list[dict] = []
     files: list[dict] = []
-    for path in sorted(folder.rglob("*.pdf")):
+    for path in paths:
         found, summary = parse_pdf(client, path, llm)
         products.extend(found)
         files.append(summary)

@@ -11,6 +11,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+from typing import Sequence
 
 from quuipu.config import ClientConfig, data_dir, load_client
 from quuipu.ingestion.llm import ImageInput, LLMClient, LLMError, vision_client
@@ -96,12 +97,20 @@ def describe_image(client: ClientConfig, path: Path, llm: LLMClient) -> dict:
 
 
 def describe_images(
-    client: ClientConfig, folder: Path, llm: LLMClient, out_dir: Path | None = None
+    client: ClientConfig,
+    folders: Path | Sequence[Path],
+    llm: LLMClient,
+    out_dir: Path | None = None,
 ) -> dict:
-    """Analizza le immagini della cartella e salva il risultato in images.json."""
+    """Analizza le immagini delle cartelle e salva il risultato in images.json."""
+    folders = [folders] if isinstance(folders, Path) else list(folders)
+    paths = sorted(
+        p for folder in folders if folder.exists()
+        for p in folder.rglob("*") if p.suffix.lower() in MIME_TYPES
+    )
     images: dict[str, dict] = {}
     errors: list[dict[str, str]] = []
-    for path in sorted(p for p in folder.rglob("*") if p.suffix.lower() in MIME_TYPES):
+    for path in paths:
         try:
             data_id = image_id(path.read_bytes())
             if data_id in images:  # stessa foto salvata con un altro nome
