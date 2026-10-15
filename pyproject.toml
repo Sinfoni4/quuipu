@@ -1,0 +1,25 @@
+[project]
+name = "quuipu"
+version = "0.1.0"
+description = "Agente AI che ricompone il sito aziendale in funzione del visitatore"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.27",
+    "beautifulsoup4>=4.12",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+quuipu-crawl = "quuipu.ingestion.crawler:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

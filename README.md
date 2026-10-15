@@ -11,3 +11,31 @@ PoC in avvio:
 - **Sito pilota:** cantina vitivinicola, ospitato su quuipu.me.
 - **Stack:** backend Python (FastAPI) e front-end statico.
 - **Modello linguistico:** Mistral.
+
+## Struttura
+
+- `clients/`: configurazione di ogni cliente (sito, lingue, esclusioni del crawler).
+- `src/quuipu/ingestion/`: ingestione dei contenuti; per ora c'è solo il crawler del sito.
+- `tests/`: test automatici.
+- `data/`: pagine scaricate e dati generati. Non va su git.
+
+## Uso
+
+Installazione:
+
+```bash
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install -e ".[dev]"
+```
+
+Test:
+
+```bash
+.venv\Scripts\python.exe -m pytest
+```
+
+Crawl del sito di un cliente. I risultati vanno in `data/<cliente>/crawl/`.
+
+```bash
+.venv\Scripts\quuipu-crawl.exe casapaladin --max-pages 20
+```

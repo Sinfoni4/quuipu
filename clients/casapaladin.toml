@@ -1,0 +1,23 @@
+# Cliente pilota del PoC: cantina vitivinicola (settore agrifood).
+id = "casapaladin"
+name = "Casa Paladin"
+sector = "agrifood"
+base_url = "https://www.casapaladin.it/"
+languages = ["it", "en"]
+
+[crawl]
+max_pages = 300
+delay_seconds = 1.0
+# Area riservata e pagine tecniche: non sono contenuti pubblici da usare.
+exclude = [
+    "/portal/",
+    "/login-page/",
+    "/registrazione-client/",
+    "/successful-client-registration/",
+    "/hub-page/",
+    "/client-profile/",
+    "/error/",
+    "/wp-admin/",
+    "/wp-json/",
+    "/feed/",
+]
