@@ -26,6 +26,7 @@ quuipu-search = "quuipu.knowledge.cli:search_main"
 quuipu-plan = "quuipu.composer.planner:main"
 quuipu-agent = "quuipu.control:main"
 quuipu-api = "quuipu.api.app:main"
+quuipu-demo = "quuipu.demo.run:main"
 
 [build-system]
 requires = ["setuptools>=68"]
@@ -33,6 +34,9 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+quuipu = ["demo/static/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -67,7 +67,9 @@ def create_app(
     llm_factory: Callable[[], LLMClient] = text_client,
     embedder_factory: Callable[[], Embedder] = default_embedder,
     sessions: SessionStore | None = None,
+    debug: bool = False,
 ) -> FastAPI:
+    """debug=True aggiunge alle risposte i dettagli interni (solo per la demo)."""
     clients_dir = clients_dir or CLIENTS_DIR
     data_root = data_root or data_dir()
     sessions = sessions or SessionStore()
@@ -161,6 +163,15 @@ def create_app(
                 da_cache=response.da_cache,
                 piano=resolve_plan(response.piano, store) if response.piano else None,
             )
+            if debug:
+                result["debug"] = {
+                    "probabilita": estimate.probabilita,
+                    "segnali": estimate.segnali,
+                    "scartati": response.scartati,
+                    "avvisi": response.avvisi,
+                    "piano_grezzo": response.piano,
+                    "agente_attivo": active,
+                }
         return result
 
     app.state.sessions = sessions

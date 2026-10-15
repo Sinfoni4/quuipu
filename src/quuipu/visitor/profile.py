@@ -112,8 +112,10 @@ def estimate_profile(
     # Pagine: d'ingresso e viste durante la sessione, tramite la classificazione.
     if store is not None:
         pages = [(signals.pagina_ingresso, WEIGHT_ENTRY_PAGE, "pagina d'ingresso")] if signals.pagina_ingresso else []
+        # La pagina d'ingresso conta già come tale, non anche come pagina vista.
         pages += [(url, WEIGHT_VIEWED_PAGE, "pagina vista")
-                  for url in signals.pagine_viste[-MAX_VIEWED_PAGES:]]
+                  for url in signals.pagine_viste[-MAX_VIEWED_PAGES:]
+                  if url != signals.pagina_ingresso]
         for url, weight, why in pages:
             page = store.find_page(url)
             if page and page["stato"] == APPROVED and page["profili"]:

@@ -32,9 +32,14 @@ def public_content(content: dict) -> dict:
     dati = content["dati"]
     if content["fonte"] == "pagina":
         images = dati.get("immagini") or []
+        # Il titolo della pagina (h1) è già mostrato come titolo: non lo si ripete nel testo.
+        lines = content["testo"].split("\n")
+        headings = dati.get("intestazioni") or []
+        if lines and headings and lines[0] == headings[0]:
+            lines = lines[1:]
         view.update(
             descrizione=dati.get("descrizione", ""),
-            estratto=_excerpt(content["testo"]),
+            estratto=_excerpt("\n".join(lines)),
             immagine=images[0] if images else None,
         )
     elif content["fonte"] == "prodotto":

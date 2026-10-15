@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "quuipu-demo",
+      "runtimeExecutable": ".venv\\Scripts\\quuipu-demo.exe",
+      "runtimeArgs": [],
+      "port": 8000
+    }
+  ]
+}

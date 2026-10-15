@@ -14,6 +14,8 @@ def store(tmp_path):
             Content(id="p-home", fonte="pagina", tipo="chi_siamo", hash="2", lingua="it",
                     url="https://www.cantina.test/",
                     profili=["buyer_estero", "distributore", "privato", "ente", "curioso"]),
+            Content(id="p-spedizioni", fonte="pagina", tipo="faq", hash="4", lingua="it",
+                    url="https://www.cantina.test/spedizioni-estero/", profili=["buyer_estero"]),
             Content(id="p-bozza", fonte="pagina", tipo="chi_siamo", hash="3", lingua="it",
                     url="https://www.cantina.test/bozza/", profili=["ente"], motivi=["dubbio"]),
         ])
@@ -91,6 +93,11 @@ def test_pages_count_through_their_profiles(store):
     # Le pagine non approvate non contano.
     assert estimate(store, pagine_viste=["https://www.cantina.test/bozza/"]).segnali == []
 
+    # La navigazione rafforza il profilo; la pagina d'ingresso non conta due volte.
     browsing = estimate(store, pagina_ingresso="https://www.cantina.test/export/",
-                        pagine_viste=["https://www.cantina.test/export/"], lingua="en")
-    assert browsing.confidenza > 0.5
+                        pagine_viste=["https://www.cantina.test/export/",
+                                      "https://www.cantina.test/spedizioni-estero/"], lingua="en")
+    assert browsing.confidenza == pytest.approx(5 / 9, abs=1e-3)
+    assert [s for s in browsing.segnali if s.startswith("pagina")] == [
+        "pagina d'ingresso: buyer_estero", "pagina vista: buyer_estero",
+    ]

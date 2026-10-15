@@ -43,8 +43,25 @@ PoC in costruzione:
   - `sessions.py`: sessioni solo in memoria, senza cookie.
   - `render.py`: dati pubblici dei contenuti per il widget.
 - `src/quuipu/control.py`: interruttore di emergenza dell'agente.
+- `src/quuipu/demo/`: demo simulata.
+  - `site.py`: sito della cantina inventata.
+  - `simulated.py`: modello ed embedding simulati.
+  - `run.py`: comando che avvia tutto.
+  - `static/`: pagina di demo.
 - `tests/`: test automatici, con sito, modelli ed embedding simulati.
 - `data/`: dati scaricati e generati, una cartella per cliente. Non va su git.
+
+## Demo simulata
+
+Mostra tutta la piattaforma al lavoro senza Mistral e senza dati reali. Il comando:
+
+1. genera il sito di una cantina inventata (Cantina Valmora) e lo serve su http://127.0.0.1:8765;
+2. esegue la pipeline vera con un modello simulato, che commette di proposito alcuni errori per mostrare i controlli;
+3. apre su http://127.0.0.1:8000/demo/ una pagina con diversi visitatori-tipo, la pagina che ciascuno riceve e cosa è successo dietro.
+
+```bash
+.venv\Scripts\quuipu-demo.exe
+```
 
 ## Uso
 
