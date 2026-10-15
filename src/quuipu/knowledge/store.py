@@ -51,6 +51,22 @@ CREATE TABLE IF NOT EXISTS chunks (
     vettore     BLOB NOT NULL
 );
 CREATE INDEX IF NOT EXISTS chunks_content ON chunks(content_id);
+CREATE TABLE IF NOT EXISTS plan_cache (
+    chiave      TEXT PRIMARY KEY,
+    versione    TEXT NOT NULL,
+    piano       TEXT NOT NULL,
+    creato      TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS plan_log (
+    id          INTEGER PRIMARY KEY,
+    creato      TEXT NOT NULL,
+    richiesta   TEXT NOT NULL,
+    esito       TEXT NOT NULL,
+    piano       TEXT,
+    motivi      TEXT NOT NULL,
+    scartati    TEXT NOT NULL,
+    da_cache    INTEGER NOT NULL
+);
 """
 
 
@@ -95,6 +111,9 @@ class KnowledgeStore:
         self.conn = sqlite3.connect(path)
         self.conn.row_factory = sqlite3.Row
         self.conn.execute("PRAGMA foreign_keys = ON")
+        # WAL: scritture più veloci e letture non bloccate mentre si scrive il registro.
+        self.conn.execute("PRAGMA journal_mode = WAL")
+        self.conn.execute("PRAGMA synchronous = NORMAL")
         self.conn.executescript(SCHEMA)
 
     @classmethod

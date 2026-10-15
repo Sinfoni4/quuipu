@@ -11,8 +11,8 @@ PoC in costruzione:
 - **Sito pilota:** cantina vitivinicola, ospitato su quuipu.me.
 - **Stack:** backend Python (FastAPI) e front-end statico.
 - **Modelli:** Mistral per il testo e mistral-embed per la ricerca semantica; il modello per le immagini non è ancora stato scelto.
-- **Fatto:** ingestione completa e base di conoscenza con ricerca semantica.
-- **Da fare:** page plan e validatore, API, sito pilota, assistente in chat.
+- **Fatto:** ingestione completa, base di conoscenza con ricerca semantica, page plan con validatore, cache e registro.
+- **Da fare:** stima del profilo del visitatore, API, sito pilota, assistente in chat.
 
 ## Struttura
 
@@ -32,6 +32,11 @@ PoC in costruzione:
   - `search.py`: indicizzazione e ricerca per significato.
   - `embeddings.py`: calcolo dei vettori.
   - `cli.py`: comandi per revisione e ricerca.
+- `src/quuipu/composer/`: composizione della pagina.
+  - `components.py`: libreria dei 6 componenti del PoC con i loro schemi.
+  - `planner.py`: l'agente che propone il page plan.
+  - `validator.py`: controlla il piano; se non torna, pagina standard.
+  - `history.py`: cache dei piani e registro di tutte le risposte.
 - `tests/`: test automatici, con sito, modelli ed embedding simulati.
 - `data/`: dati scaricati e generati, una cartella per cliente. Non va su git.
 
@@ -83,6 +88,18 @@ Restituisce solo contenuti approvati.
 
 ```bash
 .venv\Scripts\quuipu-search.exe casapaladin "vini per l'export" --profilo buyer_estero
+```
+
+### Page plan di prova
+
+Compone la pagina per un profilo e stampa il piano validato, oppure il motivo per cui resta la pagina standard. Ogni piano viene registrato.
+
+```bash
+.venv\Scripts\quuipu-plan.exe casapaladin --profilo buyer_estero --lingua en
+```
+
+```bash
+.venv\Scripts\quuipu-plan.exe casapaladin --profilo privato --domanda "avete vini biologici?"
 ```
 
 ### Singoli passaggi

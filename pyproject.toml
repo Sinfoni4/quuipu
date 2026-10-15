@@ -21,6 +21,7 @@ quuipu-classify = "quuipu.ingestion.classification:main"
 quuipu-ingest = "quuipu.pipeline:main"
 quuipu-review = "quuipu.knowledge.cli:review_main"
 quuipu-search = "quuipu.knowledge.cli:search_main"
+quuipu-plan = "quuipu.composer.planner:main"
 
 [build-system]
 requires = ["setuptools>=68"]
